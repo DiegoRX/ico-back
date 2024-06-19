@@ -1,1 +1,1 @@
-web: npm i --force && node index.js
+web: npm run start:prod
