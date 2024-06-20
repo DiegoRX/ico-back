@@ -10,7 +10,7 @@
     "npm": "10.8.1"
   },
   "scripts": {
-    "build": "npm i --force && nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
