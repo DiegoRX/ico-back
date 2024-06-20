@@ -6,7 +6,8 @@
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": "20.9.0"
+    "node": "20.9.0",
+    "npm": "10.8.1"
   },
   "scripts": {
     "build": "npm i --force && nest build",
