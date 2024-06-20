@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "MIT",
+  "engines": {
+    "node": "20.9.0"
+  },
   "scripts": {
     "build": "npm i --force && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
