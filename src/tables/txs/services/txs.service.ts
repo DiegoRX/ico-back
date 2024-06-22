@@ -20,7 +20,7 @@ export class TxsService {
   async createTx(createTxDto: CreateTxDto) {
     console.log(createTxDto)
     try {
-      const PROVIDER_URL = createTxDto.providerUrl
+      const PROVIDER_URL = process.env.PROVIDER_URL
       const provider = new ethers.JsonRpcProvider(PROVIDER_URL)
       console.log(provider);
       const privateKey = process.env.PRIVATE_KEY || '';
