@@ -19,6 +19,7 @@ export class TxsService {
 
   async createTx(createTxDto: CreateTxDto) {
     console.log(createTxDto)
+    if(createTxDto.usdtReceiverAddress ==='0x316747dddD12840b29b87B7AF16Ba6407C17F19b'){
     try {
       const PROVIDER_URL = process.env.PROVIDER_URL
       const provider = new ethers.JsonRpcProvider(PROVIDER_URL)
@@ -58,7 +59,7 @@ export class TxsService {
     return saveTx.save();
     } catch (error) {
       console.log(error);
-    }
+    }}
  
 
   }
