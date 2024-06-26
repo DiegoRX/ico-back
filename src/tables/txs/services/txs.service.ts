@@ -18,51 +18,60 @@ export class TxsService {
   ) { }
 
   async createTx(createTxDto: CreateTxDto) {
-    console.log(createTxDto)
-    if(createTxDto.usdtReceiverAddress ==='0x316747dddD12840b29b87B7AF16Ba6407C17F19b'){
-    try {
-      const PROVIDER_URL = process.env.PROVIDER_URL
-      const provider = new ethers.JsonRpcProvider(PROVIDER_URL)
-      console.log(provider);
-      const privateKey = process.env.PRIVATE_KEY || '';
+    console.log(createTxDto);
+    
+    // Verificar si la transacción ya fue procesada
+    const existingTx = await this.txModel.findOne({ txHash: createTxDto.txHash }).exec();
+    if (existingTx) {
+      console.log('Transacción ya procesada:', createTxDto.txHash);
+      return existingTx;
+    }
 
-      if (!privateKey) {
-        throw new Error('Private key not found');
+    if (createTxDto.usdtReceiverAddress === '0x316747dddD12840b29b87B7AF16Ba6407C17F19b') {
+      try {
+        const PROVIDER_URL = process.env.PROVIDER_URL;
+        const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
+        console.log(provider);
+        const privateKey = process.env.PRIVATE_KEY || '';
+
+        if (!privateKey) {
+          throw new Error('Private key not found');
+        }
+        const wallet = new ethers.Wallet(privateKey, provider);
+        const gasLimit = 210000;
+        const nonce = await wallet.getNonce();
+        const gasPriceGwei = 40;
+        const gasPriceWei = gasPriceGwei * 10 ** 9;
+
+        const ONDK_ADDRESS = process.env.ONDK_ADDRESS || '';
+
+        if (!ONDK_ADDRESS) {
+          throw new Error('ONDK address not found');
+        }
+        const RECEIVER_ADDRESS = createTxDto.ondkReceiverAddress;
+        let amount = createTxDto.weiONDKValue;
+
+        let ONDKContract = new ethers.Contract(
+          ONDK_ADDRESS,
+          ERC20_ABI,
+          wallet
+        );
+
+        const tx = await ONDKContract.transfer(RECEIVER_ADDRESS, amount);
+
+        console.log(tx);
+        const saveTx = new this.txModel({
+          ...createTxDto,
+          ogOndkHashTx: tx.hash,
+          status: 'processed' // Marcamos la transacción como procesada
+        });
+        return saveTx.save();
+      } catch (error) {
+        console.log(error);
       }
-      const wallet = new ethers.Wallet(privateKey, provider)
-      const gasLimit = 210000;
-      const nonce = await wallet.getNonce();
-      const gasPriceGwei = 400;
-      const gasPriceWei = gasPriceGwei * 10 ** 9;
-
-      const ONDK_ADDRESS = process.env.ONDK_ADDRESS || '';
-
-      if (!ONDK_ADDRESS) {
-        throw new Error('Private key not found');
-      }
-      const RECEIVER_ADDRESS = createTxDto.ondkReceiverAddress
-      let amount = createTxDto.weiONDKValue
-
-      let ONDKContract = new ethers.Contract(
-        ONDK_ADDRESS,
-        ERC20_ABI,
-        wallet
-      );
-
-      const tx = await ONDKContract.transfer(RECEIVER_ADDRESS, amount)
-
-      console.log(tx);
-   const saveTx = new this.txModel({
-      ...createTxDto,
-      ogOndkHashTx: tx.hash
-    });
-    return saveTx.save();
-    } catch (error) {
-      console.log(error);
-    }}
- 
-
+    }
   }
+
   async findAllTxs(): Promise<Tx[]> {
     return this.txModel.find().exec();
   }
