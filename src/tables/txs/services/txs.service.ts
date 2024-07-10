@@ -19,7 +19,7 @@ export class TxsService {
 
   async createTx(createTxDto: CreateTxDto) {
     console.log(createTxDto);
-    
+
     // Verificar si la transacción ya fue procesada
     const existingTx = await this.txModel.findOne({ txHash: createTxDto.txHash }).exec();
     if (existingTx) {
@@ -43,21 +43,29 @@ export class TxsService {
         const gasPriceGwei = 40;
         const gasPriceWei = gasPriceGwei * 10 ** 9;
 
-        const ONDK_ADDRESS = process.env.ONDK_ADDRESS || '';
+        let TOKEN_ADDRESS = ''
 
-        if (!ONDK_ADDRESS) {
-          throw new Error('ONDK address not found');
+
+        if (createTxDto.tokenName === 'ONDK') {
+          TOKEN_ADDRESS = process.env.ONDK_ADDRESS || '';
+        } else if (createTxDto.tokenName === 'AUKA') {
+          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '';
         }
+
+        if (TOKEN_ADDRESS === '') {
+          throw new Error('Token address not found');
+        }
+
         const RECEIVER_ADDRESS = createTxDto.ondkReceiverAddress;
         let amount = createTxDto.weiONDKValue;
 
-        let ONDKContract = new ethers.Contract(
-          ONDK_ADDRESS,
+        let tokenContract = new ethers.Contract(
+          TOKEN_ADDRESS,
           ERC20_ABI,
           wallet
         );
 
-        const tx = await ONDKContract.transfer(RECEIVER_ADDRESS, amount);
+        const tx = await tokenContract.transfer(RECEIVER_ADDRESS, amount);
 
         console.log(tx);
         const saveTx = new this.txModel({

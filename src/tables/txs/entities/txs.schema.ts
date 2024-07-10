@@ -15,7 +15,8 @@ export class Tx {
 
   @Prop({ required: true })
   network: string;
-
+  @Prop({ required: true })
+  tokenName: string;
   @Prop({ required: true })
   networkId: string;
 
