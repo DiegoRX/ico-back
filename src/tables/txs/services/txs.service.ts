@@ -45,6 +45,8 @@ export class TxsService {
 
         let TOKEN_ADDRESS = ''
 
+        
+
 
         if (createTxDto.tokenName === 'ONDK') {
           TOKEN_ADDRESS = process.env.ONDK_ADDRESS || '';
@@ -55,6 +57,8 @@ export class TxsService {
         if (TOKEN_ADDRESS === '') {
           throw new Error('Token address not found');
         }
+
+        if (createTxDto.tokenName != 'ORIGEN') {
 
         const RECEIVER_ADDRESS = createTxDto.ondkReceiverAddress;
         let amount = createTxDto.weiONDKValue;
@@ -74,6 +78,25 @@ export class TxsService {
           status: 'processed' // Marcamos la transacción como procesada
         });
         return saveTx.save();
+      } else if (createTxDto.tokenName === 'ORIGEN') {
+        const data = {
+          to: createTxDto.ondkReceiverAddress,
+          value: createTxDto.weiONDKValue,
+          gasLimit: gasLimit,
+          nonce: nonce,
+          gasPrice: gasPriceWei,
+        };
+        const transaction = await wallet.sendTransaction(data);
+    console.log(transaction);
+    const tx = await transaction.wait();
+    console.log(tx);
+    const saveTx = new this.txModel({
+      ...createTxDto,
+      ogOndkHashTx: tx.hash,
+      status: 'processed' // Marcamos la transacción como procesada
+    });
+    return saveTx.save();
+      }
       } catch (error) {
         console.log(error);
       }
