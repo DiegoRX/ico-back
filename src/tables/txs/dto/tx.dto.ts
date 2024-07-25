@@ -23,7 +23,7 @@ export class CreateTxDto {
   readonly usdtReceiverAddress: string;
 
   @ApiProperty({ description: 'Dirección del receptor Token', example: '0xb71de5d4cce44d86e2fb9df6c49bbc970be4d1f8' })
-  readonly ondkReceiverAddress: string;
+  readonly tokenReceiverAddress: string;
 
   @ApiProperty({ description: 'Hash de la transacción', example: '0xb49aed9f947d6ca4b408619da9fd8fb9cbb9d2a5ad779445ce6ee0366d4af0c8' })
   readonly txHash: string;
@@ -35,13 +35,13 @@ export class CreateTxDto {
   readonly usdtAmount: string;
 
   @ApiProperty({ description: 'Cantidad de ONDK', example: '0.01' })
-  readonly ondkAmount: string;
+  readonly tokenAmount: string;
 
   @ApiProperty({ description: 'Valor en wei del USDT', example: '30000' })
   readonly weiUSDTValue: string;
 
   @ApiProperty({ description: 'Valor en wei del ONDK', example: '10000000000000000' })
-  readonly weiONDKValue: string;
+  readonly weiTokenValue: string;
 
   @ApiProperty({ description: 'Hash de la transacción Token original', example: '0xb49aed9f947d6ca4b408619da9fd8fb9cbb9d2a5ad779445ce6ee0366d4af0c8' })
   readonly ogOndkHashTx: string;

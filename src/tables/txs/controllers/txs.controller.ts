@@ -21,6 +21,10 @@ export class TxsController {
   async create(@Body() createTxDto: CreateTxDto): Promise<Tx> {
     return this.txsService.createTx(createTxDto);
   }
+  @Post('sell')
+  async createSell(@Body() createTxDto: CreateTxDto): Promise<Tx> {
+    return this.txsService.createSellTx(createTxDto);
+  }
 
   @Get()
   @UseGuards(AuthGuard)

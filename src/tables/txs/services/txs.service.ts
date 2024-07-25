@@ -52,6 +52,8 @@ export class TxsService {
           TOKEN_ADDRESS = process.env.ONDK_ADDRESS || '';
         } else if (createTxDto.tokenName === 'AUKA') {
           TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '';
+        } else if (createTxDto.tokenName === 'ORIGEN') {
+          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '0x';
         }
 
         if (TOKEN_ADDRESS === '') {
@@ -60,8 +62,8 @@ export class TxsService {
 
         if (createTxDto.tokenName != 'ORIGEN') {
 
-        const RECEIVER_ADDRESS = createTxDto.ondkReceiverAddress;
-        let amount = createTxDto.weiONDKValue;
+        const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
+        let amount = createTxDto.weiTokenValue;
 
         let tokenContract = new ethers.Contract(
           TOKEN_ADDRESS,
@@ -80,12 +82,14 @@ export class TxsService {
         return saveTx.save();
       } else if (createTxDto.tokenName === 'ORIGEN') {
         const data = {
-          to: createTxDto.ondkReceiverAddress,
-          value: createTxDto.weiONDKValue,
+          to: createTxDto.tokenReceiverAddress,
+          value: createTxDto.weiTokenValue,
           gasLimit: gasLimit,
           nonce: nonce,
           gasPrice: gasPriceWei,
         };
+        const balance = await provider.getBalance(wallet.address);
+        console.log(balance);
         const transaction = await wallet.sendTransaction(data);
     console.log(transaction);
     const tx = await transaction.wait();
@@ -102,7 +106,63 @@ export class TxsService {
       }
     }
   }
+  async createSellTx(createTxDto: CreateTxDto) {
+    console.log(createTxDto);
 
+    // Verificar si la transacción ya fue procesada
+    const existingTx = await this.txModel.findOne({ txHash: createTxDto.txHash }).exec();
+    if (existingTx) {
+      console.log('Transacción ya procesada:', createTxDto.txHash);
+      return existingTx;
+    }
+
+    if (createTxDto.usdtReceiverAddress === '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909' ) {
+      try {
+        const PROVIDER_URL = process.env.PROVIDER_URL;
+        const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
+        console.log(provider);
+        const privateKey = process.env.AUKA_PRIVATE_KEY || '';
+
+        if (!privateKey) {
+          throw new Error('Private key not found');
+        }
+        const wallet = new ethers.Wallet(privateKey, provider);
+        const gasLimit = 210000;
+        const nonce = await wallet.getNonce();
+        const gasPriceGwei = 40;
+        const gasPriceWei = gasPriceGwei * 10 ** 9;
+
+        let TOKEN_ADDRESS = ''
+
+        
+const USDT_ADDRESS = createTxDto.usdtAddress
+
+       
+        const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
+        let amount = createTxDto.weiTokenValue;
+
+        let usdtContract = new ethers.Contract(
+          USDT_ADDRESS,
+          ERC20_ABI,
+          wallet
+        );
+
+        const tx = await usdtContract.transfer(RECEIVER_ADDRESS, amount);
+
+        console.log(tx);
+        const saveTx = new this.txModel({
+          ...createTxDto,
+          ogOndkHashTx: tx.hash,
+          status: 'processed' // Marcamos la transacción como procesada
+        });
+        return saveTx.save();
+     
+      
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
   async findAllTxs(): Promise<Tx[]> {
     return this.txModel.find().exec();
   }
