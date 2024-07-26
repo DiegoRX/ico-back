@@ -27,7 +27,7 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0x316747dddD12840b29b87B7AF16Ba6407C17F19b') {
+    if (createTxDto.usdtReceiverAddress === '0x316747dddD12840b29b87B7AF16Ba6407C17F19b' || '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909') {
       try {
         const PROVIDER_URL = process.env.PROVIDER_URL;
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
