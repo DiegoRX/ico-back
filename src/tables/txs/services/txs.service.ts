@@ -31,30 +31,33 @@ export class TxsService {
       try {
         const PROVIDER_URL = process.env.PROVIDER_URL;
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
-        console.log(provider);
-        const privateKey = process.env.PRIVATE_KEY || '';
+
+        let TOKEN_ADDRESS = ''
+        let privateKey = ''
+        if (createTxDto.tokenName === 'ONDK') {
+          privateKey = process.env.PRIVATE_KEY || '';
+          TOKEN_ADDRESS = process.env.ONDK_ADDRESS || '';
+        } else if (createTxDto.tokenName === 'AUKA') {
+          privateKey = process.env.AUKA_PRIVATE_KEY || '';
+          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '';
+        } else if (createTxDto.tokenName === 'ORIGEN') {
+          privateKey = process.env.AUKA_PRIVATE_KEY || '';
+          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '0x';
+        }
 
         if (!privateKey) {
           throw new Error('Private key not found');
         }
         const wallet = new ethers.Wallet(privateKey, provider);
-        const gasLimit = 210000;
+        const gasLimit = 21000;
         const nonce = await wallet.getNonce();
-        const gasPriceGwei = 40;
+        const gasPriceGwei = 2000;
         const gasPriceWei = gasPriceGwei * 10 ** 9;
 
-        let TOKEN_ADDRESS = ''
-
-        
 
 
-        if (createTxDto.tokenName === 'ONDK') {
-          TOKEN_ADDRESS = process.env.ONDK_ADDRESS || '';
-        } else if (createTxDto.tokenName === 'AUKA') {
-          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '';
-        } else if (createTxDto.tokenName === 'ORIGEN') {
-          TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '0x';
-        }
+
+
 
         if (TOKEN_ADDRESS === '') {
           throw new Error('Token address not found');
@@ -62,45 +65,47 @@ export class TxsService {
 
         if (createTxDto.tokenName != 'ORIGEN') {
 
-        const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
-        let amount = createTxDto.weiTokenValue;
+          const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
+          let amount = createTxDto.weiTokenValue;
 
-        let tokenContract = new ethers.Contract(
-          TOKEN_ADDRESS,
-          ERC20_ABI,
-          wallet
-        );
+          let tokenContract = new ethers.Contract(
+            TOKEN_ADDRESS,
+            ERC20_ABI,
+            wallet
+          );
+          console.log(TOKEN_ADDRESS, wallet.address)
+          const balance = await tokenContract.balanceOf(wallet.address);
+          console.log(`Balance: ${balance} tokens`);
+          const tx = await tokenContract.transfer(RECEIVER_ADDRESS, amount);
 
-        const tx = await tokenContract.transfer(RECEIVER_ADDRESS, amount);
-
-        console.log(tx);
-        const saveTx = new this.txModel({
-          ...createTxDto,
-          ogOndkHashTx: tx.hash,
-          status: 'processed' // Marcamos la transacción como procesada
-        });
-        return saveTx.save();
-      } else if (createTxDto.tokenName === 'ORIGEN') {
-        const data = {
-          to: createTxDto.tokenReceiverAddress,
-          value: createTxDto.weiTokenValue,
-          gasLimit: gasLimit,
-          nonce: nonce,
-          gasPrice: gasPriceWei,
-        };
-        const balance = await provider.getBalance(wallet.address);
-        console.log(balance);
-        const transaction = await wallet.sendTransaction(data);
-    console.log(transaction);
-    const tx = await transaction.wait();
-    console.log(tx);
-    const saveTx = new this.txModel({
-      ...createTxDto,
-      ogOndkHashTx: tx.hash,
-      status: 'processed' // Marcamos la transacción como procesada
-    });
-    return saveTx.save();
-      }
+          console.log(tx);
+          const saveTx = new this.txModel({
+            ...createTxDto,
+            ogOndkHashTx: tx.hash,
+            status: 'processed' // Marcamos la transacción como procesada
+          });
+          return saveTx.save();
+        } else if (createTxDto.tokenName === 'ORIGEN') {
+          const data = {
+            to: createTxDto.tokenReceiverAddress,
+            value: createTxDto.weiTokenValue,
+            gasLimit: gasLimit,
+            nonce: nonce,
+            gasPrice: gasPriceWei,
+          };
+          const balance = await provider.getBalance(wallet.address);
+          console.log(balance);
+          const transaction = await wallet.sendTransaction(data);
+          console.log(transaction);
+          const tx = await transaction.wait();
+          console.log(tx);
+          const saveTx = new this.txModel({
+            ...createTxDto,
+            ogOndkHashTx: tx.hash,
+            status: 'processed' // Marcamos la transacción como procesada
+          });
+          return saveTx.save();
+        }
       } catch (error) {
         console.log(error);
       }
@@ -116,9 +121,9 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909' ) {
+    if (createTxDto.usdtReceiverAddress === '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909') {
       try {
-        const PROVIDER_URL = process.env.PROVIDER_URL;
+        const PROVIDER_URL = 'https://polygon-mainnet.g.alchemy.com/v2/FmIzG8DTVK5aZZPJFzmLFNPWcuLF5ZXs';
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
         console.log(provider);
         const privateKey = process.env.AUKA_PRIVATE_KEY || '';
@@ -134,10 +139,10 @@ export class TxsService {
 
         let TOKEN_ADDRESS = ''
 
-        
-const USDT_ADDRESS = createTxDto.usdtAddress
 
-       
+        const USDT_ADDRESS = createTxDto.usdtAddress
+
+
         const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
         let amount = createTxDto.weiTokenValue;
 
@@ -146,7 +151,8 @@ const USDT_ADDRESS = createTxDto.usdtAddress
           ERC20_ABI,
           wallet
         );
-
+        const balance = await usdtContract.balanceOf(wallet.address);
+        console.log(`Balance: ${balance} USDT`);
         const tx = await usdtContract.transfer(RECEIVER_ADDRESS, amount);
 
         console.log(tx);
@@ -156,8 +162,8 @@ const USDT_ADDRESS = createTxDto.usdtAddress
           status: 'processed' // Marcamos la transacción como procesada
         });
         return saveTx.save();
-     
-      
+
+
       } catch (error) {
         console.log(error);
       }

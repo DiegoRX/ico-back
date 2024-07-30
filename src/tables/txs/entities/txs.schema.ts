@@ -29,7 +29,7 @@ export class Tx {
 
 
   @Prop({ required: true })
-  ondkReceiverAddress: string;
+  tokenReceiverAddress: string;
 
   @Prop({ required: true })
   txHash: string;
@@ -41,13 +41,13 @@ export class Tx {
   usdtAmount: string;
 
   @Prop({ required: true })
-  ondkAmount: string;
+  tokenAmount: string;
 
   @Prop({ required: true })
   weiUSDTValue: string;
 
   @Prop({ required: true })
-  weiONDKValue: string;
+  weiTokenValue: string;
 
   @Prop({ required: true })
   ogOndkHashTx: string;
