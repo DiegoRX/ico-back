@@ -145,7 +145,7 @@ export class TxsService {
 
 
         const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
-        let amount = createTxDto.weiTokenValue;
+        let amount = createTxDto.weiUSDTValue;
 
         let usdtContract = new ethers.Contract(
           USDT_ADDRESS,
