@@ -49,6 +49,7 @@ export class TxsService {
           throw new Error('Private key not found');
         }
         const wallet = new ethers.Wallet(privateKey, provider);
+        console.log(wallet.address)
         const gasLimit = 21000;
         const nonce = await wallet.getNonce();
         const gasPriceGwei = 2000;
@@ -126,15 +127,15 @@ export class TxsService {
         const PROVIDER_URL = 'https://polygon-mainnet.g.alchemy.com/v2/FmIzG8DTVK5aZZPJFzmLFNPWcuLF5ZXs';
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
         console.log(provider);
-        const privateKey = process.env.AUKA_PRIVATE_KEY || '';
+        const privateKey = process.env.USDT_PRIVATE_KEY || '';
 
         if (!privateKey) {
           throw new Error('Private key not found');
         }
         const wallet = new ethers.Wallet(privateKey, provider);
-        const gasLimit = 210000;
+        const gasLimit = 21000;
         const nonce = await wallet.getNonce();
-        const gasPriceGwei = 40;
+        const gasPriceGwei = 2000;
         const gasPriceWei = gasPriceGwei * 10 ** 9;
 
         let TOKEN_ADDRESS = ''
