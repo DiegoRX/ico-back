@@ -125,7 +125,7 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909') {
+    if (createTxDto.usdtReceiverAddress === '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
       try {
         const PROVIDER_URL = 'https://polygon-mainnet.g.alchemy.com/v2/FmIzG8DTVK5aZZPJFzmLFNPWcuLF5ZXs';
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
