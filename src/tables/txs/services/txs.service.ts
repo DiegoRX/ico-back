@@ -27,7 +27,7 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0x316747dddD12840b29b87B7AF16Ba6407C17F19b' || '0x3E531Ce4fd73b5a3EA86E37fbcd92e2c36490909') {
+    if (createTxDto.usdtReceiverAddress === '0xf4435beb6daf20265d39284ad2501808c0af6c1d' || '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
       try {
         const PROVIDER_URL = process.env.PROVIDER_URL;
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
@@ -88,7 +88,7 @@ export class TxsService {
           return saveTx.save();
         } else if (createTxDto.tokenName === 'ORIGEN') {
           const data = {
-            to: createTxDto.tokenReceiverAddress,
+            to: createTxDto.tokenReceiverAddress[0],
             value: createTxDto.weiTokenValue,
             gasLimit: gasLimit,
             nonce: nonce,
@@ -100,11 +100,14 @@ export class TxsService {
           console.log(transaction);
           const tx = await transaction.wait();
           console.log(tx);
-          const saveTx = new this.txModel({
-            ...createTxDto,
+          const txDataToSave = {
+            ...createTxDto, // Copia los datos originales
+            tokenReceiverAddress: createTxDto.tokenReceiverAddress[0], // Sobrescribe el campo con el string correcto
             ogOndkHashTx: tx.hash,
-            status: 'processed' // Marcamos la transacción como procesada
-          });
+            status: 'processed'
+          };
+
+          const saveTx = new this.txModel(txDataToSave);
           return saveTx.save();
         }
       } catch (error) {
