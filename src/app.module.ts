@@ -9,12 +9,14 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TxsModule } from './tables/txs/txs.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     TxsModule,
+    OrdersModule,
     ConfigModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,4 +39,4 @@ import { TxsModule } from './tables/txs/txs.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

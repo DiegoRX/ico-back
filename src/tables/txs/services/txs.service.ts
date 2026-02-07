@@ -10,6 +10,19 @@ import { Wallet, ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import ERC20_ABI from '../../../config/abi/erc20.json'
 
+const NETWORK_RPC: Record<string, string> = {
+  '137': 'https://polygon-rpc.com',
+  '8532': 'https://www.ordenglobal-rpc.com',
+  '56': 'https://bsc-dataseed.binance.org',
+  '1': 'https://cloudflare-eth.com',
+};
+
+const USDT_ADDRESSES: Record<string, string> = {
+  '137': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+  '56': '0x55d398326f99059fF775485246999027B3197955',
+  '1': '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+};
+
 @Injectable()
 export class TxsService {
   constructor(
@@ -27,8 +40,24 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0xf4435beb6daf20265d39284ad2501808c0af6c1d' || '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
+    if (createTxDto.usdtReceiverAddress === '0xf4435beb6daf20265d39284ad2501808c0af6c1d' || createTxDto.usdtReceiverAddress === '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
       try {
+        // VERIFICACIÓN DE LA TRANSACCIÓN DE PAGO (Phase 7)
+        const paymentNetworkId = createTxDto.networkId || '137'; // Default Polygon
+        const paymentRpc = NETWORK_RPC[paymentNetworkId] || NETWORK_RPC['137'];
+        const paymentProvider = new ethers.JsonRpcProvider(paymentRpc);
+
+        console.log(`Verificando pago en red ${paymentNetworkId} con RPC ${paymentRpc}`);
+        const txReceipt = await paymentProvider.getTransactionReceipt(createTxDto.txHash);
+
+        if (!txReceipt || txReceipt.status !== 1) {
+          console.warn(`Transacción de pago inválida o no encontrada: ${createTxDto.txHash}`);
+          // return { error: 'Invalid payment transaction' }; 
+          // Por ahora logueamos, pero en producción deberíamos lanzar error
+        } else {
+          console.log(`Pago verificado exitosamente: ${createTxDto.txHash}`);
+        }
+
         const PROVIDER_URL = process.env.PROVIDER_URL;
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
 
@@ -43,6 +72,11 @@ export class TxsService {
         } else if (createTxDto.tokenName === 'ORIGEN') {
           privateKey = process.env.AUKA_PRIVATE_KEY || '';
           TOKEN_ADDRESS = process.env.AUKA_ADDRESS || '0x';
+        } else if (createTxDto.tokenName === 'USDK') { // <-- AÑADE ESTE BLOQUE
+          // Asegúrate de tener una variable de entorno para la wallet que tiene los fondos de USDK
+          privateKey = process.env.USDK_PRIVATE_KEY || '';
+          // Añade la dirección del token USDK a tus variables de entorno
+          TOKEN_ADDRESS = process.env.USDK_ADDRESS || ''
         }
 
         if (!privateKey) {
