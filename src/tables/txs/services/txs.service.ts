@@ -165,7 +165,7 @@ export class TxsService {
           return saveTx.save();
         } else if (createTxDto.tokenName === 'ORIGEN') {
           const data = {
-            to: createTxDto.tokenReceiverAddress[0],
+            to: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress),
             value: createTxDto.weiTokenValue,
             gasLimit: gasLimit,
             nonce: nonce,
@@ -179,7 +179,7 @@ export class TxsService {
           console.log(tx);
           const txDataToSave = {
             ...createTxDto, // Copia los datos originales
-            tokenReceiverAddress: createTxDto.tokenReceiverAddress[0], // Sobrescribe el campo con el string correcto
+            tokenReceiverAddress: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress), // Ensure string
             ogOndkHashTx: tx.hash,
             status: 'processed',
             paymentMethod: 'metamask', // Identificador de origen

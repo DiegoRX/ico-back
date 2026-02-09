@@ -4,6 +4,7 @@ export interface Env {
 	INTERNAL_API_KEY: string;
 	WEBHOOK_URL?: string;
 	RETURN_URL?: string;
+	BINANCE_API_URL?: string;
 }
 
 export default {
@@ -113,7 +114,11 @@ export default {
 			// Llamar a Binance Pay API v2
 			// console.log('Sending payload to Binance (v2):', payloadString);
 
-			const binanceResponse = await fetch('https://bpay.binanceapi.com/binancepay/openapi/v2/order', {
+			const apiUrl = env.BINANCE_API_URL || 'https://bpay.binanceapi.com';
+			console.log(`Using Binance API URL: ${apiUrl}`);
+			console.log(`Payload: ${payloadString}`);
+
+			const binanceResponse = await fetch(`${apiUrl}/binancepay/openapi/v2/order`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -126,6 +131,7 @@ export default {
 			});
 
 			const data = await binanceResponse.json();
+			console.log('Binance Response:', JSON.stringify(data));
 
 			return new Response(JSON.stringify(data), {
 				headers: {
