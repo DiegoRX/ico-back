@@ -10,13 +10,16 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TxsModule } from './tables/txs/txs.module';
 import { OrdersModule } from './orders/orders.module';
+import { PriceModule } from './prices/price.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     TxsModule,
+    TxsModule,
     OrdersModule,
+    PriceModule,
     ConfigModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

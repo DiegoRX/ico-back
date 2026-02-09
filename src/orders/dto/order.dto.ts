@@ -17,6 +17,18 @@ export class QuoteRequestDto {
     @IsOptional()
     @IsEnum(['USDT', 'BNB'])
     paymentCurrency?: string;
+
+    @ApiProperty({ example: 'metamask', description: 'Payment method (metamask, binance)', default: 'metamask' })
+    @IsString()
+    @IsOptional()
+    @IsEnum(['metamask', 'binance'])
+    paymentMethod?: string;
+
+    @ApiProperty({ example: 'buy', description: 'Transaction type (buy, sell)', default: 'buy' })
+    @IsString()
+    @IsOptional()
+    @IsEnum(['buy', 'sell'])
+    type?: string;
 }
 
 export class QuoteResponseDto {
@@ -34,6 +46,24 @@ export class QuoteResponseDto {
 
     @ApiProperty({ example: 'ORIGEN' })
     tokenSymbol: string;
+
+    @ApiProperty({
+        example: {
+            ounce: 2000,
+            gram: 64.3,
+            source: 'goldapi.io',
+            timestamp: '2024-01-01T00:00:00Z'
+        }
+    })
+    goldPrice?: {
+        ounce: number;
+        gram: number;
+        source: string;
+        timestamp: Date;
+    };
+
+    @ApiProperty()
+    validUntil?: Date;
 }
 
 export class CreateOrderDto {
