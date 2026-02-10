@@ -132,4 +132,16 @@ export class BinanceController {
             return false;
         }
     }
+
+    /**
+     * TESTING ONLY: Manual trigger for webhook
+     * Call this endpoint manually to simulate a successful payment
+     */
+    @Post('test-payment')
+    @HttpCode(HttpStatus.OK)
+    async testPayment(@Body() body: { merchantTradeNo: string }) {
+        this.logger.log(`TEST: Manually processing payment for ${body.merchantTradeNo}`);
+        await this.ordersService.processPayment(body.merchantTradeNo);
+        return { success: true, message: 'Payment processed' };
+    }
 }
