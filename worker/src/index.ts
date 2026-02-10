@@ -67,6 +67,7 @@ export default {
 					goodsName: string;
 					goodsDetail: string;
 				};
+				webhookUrl?: string;
 			}
 
 			const payload: BinancePayload = {
@@ -80,7 +81,8 @@ export default {
 					referenceGoodsId: 'USDT_PURCHASE',
 					goodsName: description?.slice(0, 256) || 'USDT Purchase',
 					goodsDetail: description?.slice(0, 512) || 'Purchase of USDT via Binance Pay'
-				}
+				},
+				webhookUrl: env.WEBHOOK_URL || 'https://ico-back-0f689793b1b5.herokuapp.com/api/binance/webhook'
 			};
 
 			// V2 does not support webhookUrl in payload body typically, or it is different.
