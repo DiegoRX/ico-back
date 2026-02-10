@@ -41,6 +41,10 @@ export class PriceService {
         }
 
         if (!price) {
+            price = await this.fetchCoinGecko();
+        }
+
+        if (!price) {
             this.logger.warn('All gold price sources failed. Using static fallback.');
             price = {
                 ounce: this.FALLBACK_PRICE_OZ,
@@ -114,6 +118,31 @@ export class PriceService {
             }
         } catch (error) {
             this.logger.warn(`Binance PAXG failed: ${error.message}`);
+        }
+        return null;
+    }
+
+    /**
+     * Source 3: CoinGecko PAXG/USD (Fallback)
+     */
+    private async fetchCoinGecko(): Promise<GoldPriceData | null> {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd');
+            if (response.ok) {
+                const data = await response.json() as any;
+                const priceOz = data['pax-gold']?.usd;
+
+                if (priceOz && !isNaN(priceOz) && priceOz > 0) {
+                    return {
+                        ounce: priceOz,
+                        gram: priceOz / 31.1035,
+                        source: 'coingecko',
+                        timestamp: new Date()
+                    };
+                }
+            }
+        } catch (error: any) {
+            this.logger.warn(`CoinGecko failed: ${error.message}`);
         }
         return null;
     }
