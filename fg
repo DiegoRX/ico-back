@@ -1,0 +1,40 @@
+* [33m05eece3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/binance-pay-fix[m[33m, [m[1;31mheroku/feature/binance-pay-fix[m[33m)[m feat: Add worker to create Binance Pay orders with API key validation and HMAC-SHA512 signing.
+* [33m00faa34[m feat: implement transaction schema and service for crypto token transfers and payment verification.
+* [33m0405008[m[33m ([m[1;31morigin/feature/binance-pay-fix[m[33m, [m[1;31mheroku/main[m[33m)[m fix: correct tokenReceiverAddress handling in txs.service
+* [33mabe4ed1[m feat: implement dynamic gold pricing, security hardening for txs, and environment updates
+* [33mf3c11ca[m chore: install project dependencies and add TypeScript configuration.
+* [33m07c0ce1[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m ok sell
+* [33mb7c74e7[m buy ok
+* [33mb9142a7[m fix: allow legacy peer deps
+* [33m27cabd0[m Upgrade @nestjs/graphql to v12 for NestJS 10 compatibility
+* [33md7ca458[m Fix peer deps conflict
+* [33m55cd278[m usdt value
+* [33md376a0c[m gass usdt
+* [33m02ba9a5[m cors
+* [33mbbff3e4[m ok back
+* [33m8c6bf2c[m back ok
+* [33m270d3b6[m ok back
+* [33m0365d04[m done
+* [33me288a89[m more tokens
+* [33m427870c[m block repeated tx
+* [33mfe7aac7[m secure
+* [33m4f9fc3b[m full prod
+* [33m7cbf9d2[m cors
+* [33m30f671c[m cors
+* [33mbfea300[m new
+* [33mb81a8a0[m legacy
+* [33mbe5348d[m run
+* [33mbf8682d[m proc
+* [33md063193[m proc
+* [33m30fe711[m graph
+* [33m6ae183c[m no gql
+* [33m19ea717[m package
+* [33me50e0cc[m done
+* [33mcb21d8f[m n v
+* [33m94de548[m prod
+* [33m2c27323[m prod
+* [33m4f1f434[m force
+* [33mad4ddbb[m procfile
+* [33mdcc5204[m build
+* [33mb148be7[m forced
+* [33m143a4d1[m init

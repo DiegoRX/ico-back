@@ -1,0 +1,17 @@
+=== RECENT TRANSACTIONS ===
+
+=== RECENT ORDERS (Binance Pay) ===
+ID: 6986ad57cda05da0aff75093 | Date: Fri Feb 06 2026 22:11:20 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 1 | Status: PENDING
+   TradeNo: ORD177043387949170PKN9
+ID: 6986aafccda05da0aff75087 | Date: Fri Feb 06 2026 22:01:18 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 100 | Status: PENDING
+   TradeNo: ORD177043327686047WK2K
+ID: 6986a8b5cda05da0aff75085 | Date: Fri Feb 06 2026 21:51:34 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 100 | Status: PENDING
+   TradeNo: ORD1770432693376FE5JN1
+ID: 6986a826cda05da0aff75083 | Date: Fri Feb 06 2026 21:49:11 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 100 | Status: PENDING
+   TradeNo: ORD1770432550132CCGIOZ
+ID: 6986a2c0cda05da0aff74ee8 | Date: Fri Feb 06 2026 21:26:09 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 1 | Status: PENDING
+   TradeNo: ORD17704311680976O6AAB
+ID: 6986a239cda05da0aff74ee6 | Date: Fri Feb 06 2026 21:23:54 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 100 | Status: PENDING
+   TradeNo: ORD1770431033210F9QHDD
+ID: 6986a226cda05da0aff74ee4 | Date: Fri Feb 06 2026 21:23:51 GMT-0500 (hora estándar de Colombia) | Token: ORIGEN | Amount: 100 | Status: PENDING
+   TradeNo: ORD1770431014629C5L0KO

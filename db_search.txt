@@ -1,0 +1,40 @@
+=== SEARCH RESULTS FOR 0.05 ===
+
+=== RECENT ACTIVITY (30 MINS) ===
+Recent Orders: [
+  {
+    "_id": "6986aafccda05da0aff75087",
+    "merchantTradeNo": "ORD177043327686047WK2K",
+    "tokenSymbol": "ORIGEN",
+    "tokenAmount": "100",
+    "paymentAmount": "50.00",
+    "paymentCurrency": "USDT",
+    "exchangeRate": "0.5",
+    "userWalletAddress": "0x9039f4c6b877ca4971712b90d306756f84289e64",
+    "status": "PENDING",
+    "binancePrepayId": "413597787262615552",
+    "binanceCheckoutUrl": "https://pay.binance.com/en/checkout/09c73c54ba474e09985244237de6a98c",
+    "binanceQrContent": "https://app.binance.com/qr/dplk2e390800265543aeafb477df479fce10",
+    "createdAt": "2026-02-07T03:01:18.285Z",
+    "updatedAt": "2026-02-07T03:01:18.285Z",
+    "__v": 0
+  },
+  {
+    "_id": "6986ad57cda05da0aff75093",
+    "merchantTradeNo": "ORD177043387949170PKN9",
+    "tokenSymbol": "ORIGEN",
+    "tokenAmount": "1",
+    "paymentAmount": "0.50",
+    "paymentCurrency": "USDT",
+    "exchangeRate": "0.5",
+    "userWalletAddress": "0x9039f4c6b877ca4971712b90d306756f84289e64",
+    "status": "PENDING",
+    "binancePrepayId": "413599080142700544",
+    "binanceCheckoutUrl": "https://pay.binance.com/en/checkout/4bf4fb15cf4a429b96dc655005fa7006",
+    "binanceQrContent": "https://app.binance.com/qr/dplk7d56b49eace94de5ad7334e33b1d2cc3",
+    "createdAt": "2026-02-07T03:11:20.896Z",
+    "updatedAt": "2026-02-07T03:11:20.896Z",
+    "__v": 0
+  }
+]
+Recent Txs: []

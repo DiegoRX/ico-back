@@ -1,0 +1,61 @@
+=== RECENT METAMASK TRANSACTIONS (txes) ===
+ID: 68b9b0302efa19751bb62805 | Date: Thu Sep 04 2025 15:28:48 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1
+   Buyer: 0x9039f4c6b877CA4971712b90d306756f84289E64
+   TX Hash: 0xf0e92a93c217c5020116537d97449f21ca5ad7496581ac8f7d405d1afe4d61bf
+   Backend Hash: 0x5b47cfcddf29af9ef55a79f72fbab9b3780e1e7d7cad6655998469d52b1aca5c
+   Approved: true
+-------------------------------------------
+ID: 68b9af302efa19751bb62802 | Date: Thu Sep 04 2025 15:24:32 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1.00
+   Buyer: 0x9039f4c6b877ca4971712b90d306756f84289e64
+   TX Hash: 0x6dbf05810cb88450b69eef8a59e3ba78b2e75003ac51007862438bbb5592d374
+   Backend Hash: 0x28979186f1afdf20d6c94b0b39f46e4dbbd446fbc904a4c17c31220e8771b098
+   Approved: true
+-------------------------------------------
+ID: 68b904482e47375666666f31 | Date: Thu Sep 04 2025 03:15:20 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.02 | TokenAmt: 0.52
+   Buyer: 0xF50AC4742d5f4384D21892E27c718Ec0e62346b9
+   TX Hash: 0xf57dcec40e8ef9b670a17bb98e12d2009d0aeb2624b65978bd2eeda106b52017
+   Backend Hash: 0x0f738f3f67f8f2fe96ead52fb1201a79debd1b95a81f33dce9154af352817aaf
+   Approved: true
+-------------------------------------------
+ID: 68b903bc2e47375666666f2e | Date: Thu Sep 04 2025 03:13:00 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1 | TokenAmt: 0.51
+   Buyer: 0xf50ac4742d5f4384d21892e27c718ec0e62346b9
+   TX Hash: 0x08b9d9f190ea4000519b3e6db51f689be4fd0ca1708c42866393548c820e10a6
+   Backend Hash: 0xb9c2ef02e99bbf11821aae5cfc8c041e1677d4804b4aa3a6ce9bc93211b00026
+   Approved: true
+-------------------------------------------
+ID: 68b6000285c80148ab8708fa | Date: Mon Sep 01 2025 20:20:18 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1.00
+   Buyer: 0x9039f4c6b877CA4971712b90d306756f84289E64
+   TX Hash: 0x3d02322a4b15c48e56e0b7f4e69dbf7a01ffd01eff2657af2285e71dc4970cfe
+   Backend Hash: 0xe5c3018f22c1c491264b89d491b8f4b290572d3e23407c2c93ddd6dbc513768e
+   Approved: true
+-------------------------------------------
+ID: 68b5fe1f85c80148ab8708f7 | Date: Mon Sep 01 2025 20:12:15 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1.00
+   Buyer: 0x9039f4c6b877ca4971712b90d306756f84289e64
+   TX Hash: 0xaacb4860ff910755334dd8107f1f37dec57a33be62108e633a5e1c65edc53754
+   Backend Hash: 0xbfd66993e4feb95ab4abd37c29033ca5f3bd6409c7900cb6a36e267843acb04a
+   Approved: true
+-------------------------------------------
+ID: 68b1eef9b24ee3fde4a81c64 | Date: Fri Aug 29 2025 18:18:33 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 0.46 | TokenAmt: 0.9
+   Buyer: 0x9039f4c6b877CA4971712b90d306756f84289E64
+   TX Hash: 0xb685c2f47a961a55cf4b9268acce68c21473a7b191354d53fd07ddf73873b1be
+   Backend Hash: 0x1cc1d9930acbb3612f2139c1cd5b39cd28e7641ed2a1441b5ccf64ac91e89d4e
+   Approved: true
+-------------------------------------------
+ID: 68b13c16b24ee3fde4a81c61 | Date: Fri Aug 29 2025 05:35:18 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1.00
+   Buyer: 0x9039f4c6b877ca4971712b90d306756f84289e64
+   TX Hash: 0xda2acc4c1b8f55a5c945089e5810c1838ffc2e6468b4fc7a7838b3900f5f51bd
+   Backend Hash: 0x14387e00cbff6f2fe929e897cf6bef95c05b7f4f6d60ad4e037c947b572716d6
+   Approved: true
+-------------------------------------------
+ID: 68b135d1b24ee3fde4a81c5e | Date: Fri Aug 29 2025 05:08:33 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.74 | TokenAmt: 0.9
+   Buyer: 0x9039f4c6b877CA4971712b90d306756f84289E64
+   TX Hash: 0xfe63bb19f1daf371079b1f027d0f6f5887ca6d20fbad4fbb7c83278b1a8adad3
+   Backend Hash: 0xcf1ab532a6d4fd9fd7fb05d47e955d63ab0e38bc1b775436e4d1df01424a70d3
+   Approved: true
+-------------------------------------------
+ID: 68b13565b24ee3fde4a81c5b | Date: Fri Aug 29 2025 05:06:45 GMT+0000 (Coordinated Universal Time) | Token: ORIGEN | USDT: 1.97 | TokenAmt: 1.00
+   Buyer: 0x9039f4c6b877ca4971712b90d306756f84289e64
+   TX Hash: 0xba37e15d1cf9ca644a0f66b856e948221d01a65f99d077907638e515cd8b6b58
+   Backend Hash: 0xc598dbd6b27842c8ea2a1be359537136e0a14f86c15b8eefb375b8352c4a2d14
+   Approved: true
+-------------------------------------------

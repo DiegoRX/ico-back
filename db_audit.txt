@@ -1,0 +1,9 @@
+=== COLLECTIONS ===
+- users
+- orders
+- txes
+   Count in users: 0
+   Count in orders: 7
+   Last ID: 6986ad57cda05da0aff75093 | Last Data: {"_id":"6986ad57cda05da0aff75093","merchantTradeNo":"ORD177043387949170PKN9","tokenSymbol":"ORIGEN",...
+   Count in txes: 18
+   Last ID: 68b9b0302efa19751bb62805 | Last Data: {"_id":"68b9b0302efa19751bb62805","providerUrl":"polygon-mainnet.infura.io","network":"Polygon Mainn...
