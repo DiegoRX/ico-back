@@ -58,36 +58,35 @@ export default {
 			interface BinancePayload {
 				env: { terminalType: string };
 				merchantTradeNo: string;
-				orderAmount: string;
+				orderAmount: number;
 				currency: string;
-				goods: {
+				description: string;
+				goodsDetails: {
 					goodsType: string;
 					goodsCategory: string;
 					referenceGoodsId: string;
 					goodsName: string;
 					goodsDetail: string;
-				};
-				webhookUrl?: string;
+				}[];
 			}
 
 			const payload: BinancePayload = {
 				env: { terminalType: 'WEB' },
 				merchantTradeNo: merchantTradeNo || `ORDER_${timestamp}`,
-				orderAmount: amount.toString(),
+				orderAmount: parseFloat(amount),
 				currency: currency.toUpperCase(),
-				goods: {
+				description: description || 'Order',
+				goodsDetails: [{
 					goodsType: '01',
 					goodsCategory: 'Z000',
 					referenceGoodsId: 'USDT_PURCHASE',
 					goodsName: description?.slice(0, 256) || 'USDT Purchase',
 					goodsDetail: description?.slice(0, 512) || 'Purchase of USDT via Binance Pay'
-				},
-				webhookUrl: env.WEBHOOK_URL || 'https://ico-back-0f689793b1b5.herokuapp.com/api/binance/webhook'
+				}]
 			};
 
-			// V2 does not support webhookUrl in payload body typically, or it is different.
-			// We rely on Dashboard settings or different mechanism?
-			// For now, let's get ORDER creation working.
+			// V3 API does not typically require webhookUrl in body if configured in dashboard
+			// console.log('Sending payload to Binance (v3):', JSON.stringify(payload));
 
 			const payloadString = JSON.stringify(payload);
 			const signatureString = timestamp + '\n' + nonce + '\n' + payloadString + '\n';
@@ -113,14 +112,11 @@ export default {
 				.join('')
 				.toUpperCase();
 
-			// Llamar a Binance Pay API v2
-			// console.log('Sending payload to Binance (v2):', payloadString);
-
 			const apiUrl = env.BINANCE_API_URL || 'https://bpay.binanceapi.com';
 			console.log(`Using Binance API URL: ${apiUrl}`);
 			console.log(`Payload: ${payloadString}`);
 
-			const binanceResponse = await fetch(`${apiUrl}/binancepay/openapi/v2/order`, {
+			const binanceResponse = await fetch(`${apiUrl}/binancepay/openapi/v3/order`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

@@ -13,22 +13,8 @@ import {
 } from '../dto/order.dto';
 import { BlockchainService } from './blockchain.service';
 import { PriceService } from '../../prices/price.service';
+import { BinancePayService } from './binance-pay.service';
 
-interface BinancePayResponse {
-    status: string;
-    code: string;
-    data?: {
-        prepayId: string;
-        terminalType: string;
-        expireTime: number;
-        qrcodeLink: string;
-        qrContent: string;
-        checkoutUrl: string;
-        deeplink: string;
-        universalUrl: string;
-    };
-    errorMessage?: string;
-}
 
 @Injectable()
 export class OrdersService {
@@ -49,6 +35,7 @@ export class OrdersService {
         private readonly configService: ConfigService,
         private readonly blockchainService: BlockchainService,
         private readonly priceService: PriceService,
+        private readonly binancePayService: BinancePayService,
     ) {
         const bnbPrice = this.configService.get<string>('BNB_PRICE_USDT');
         if (bnbPrice) {
@@ -197,10 +184,10 @@ export class OrdersService {
             status: OrderStatus.PENDING,
         });
 
-        // Call Binance Pay via Worker
-        const binanceResponse = await this.createBinancePayOrder(
+        // Call Binance Pay via Service (Internal)
+        const binanceResponse = await this.binancePayService.createOrder(
             merchantTradeNo,
-            quote.paymentAmount,
+            parseFloat(quote.paymentAmount),
             currency,
             `Compra de ${tokenAmount} ${symbol}`,
         );
@@ -332,41 +319,5 @@ export class OrdersService {
         }
     }
 
-    /**
-     * Call Cloudflare Worker to create Binance Pay order
-     */
-    private async createBinancePayOrder(
-        merchantTradeNo: string,
-        amount: string,
-        currency: string,
-        description: string,
-    ): Promise<BinancePayResponse> {
-        const workerUrl = this.configService.get<string>('BINANCE_WORKER_URL');
-        const internalApiKey = this.configService.get<string>('INTERNAL_API_KEY');
 
-        if (!workerUrl) {
-            throw new BadRequestException('Binance Worker URL not configured');
-        }
-
-        try {
-            const response = await fetch(`${workerUrl}/api/create-order`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': internalApiKey || '',
-                },
-                body: JSON.stringify({
-                    amount,
-                    currency,
-                    description,
-                    merchantTradeNo,
-                }),
-            });
-
-            return await response.json() as any;
-        } catch (error: any) {
-            this.logger.error(`Binance Worker call failed: ${error.message}`);
-            throw new BadRequestException('Failed to connect to payment service');
-        }
-    }
 }

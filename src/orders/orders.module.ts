@@ -7,6 +7,7 @@ import { OrdersController } from './controllers/orders.controller';
 import { BinanceController } from './controllers/binance.controller';
 import { OrdersService } from './services/orders.service';
 import { BlockchainService } from './services/blockchain.service';
+import { BinancePayService } from './services/binance-pay.service';
 import { PriceModule } from '../prices/price.module';
 
 @Module({
@@ -19,7 +20,7 @@ import { PriceModule } from '../prices/price.module';
         ]),
     ],
     controllers: [OrdersController, BinanceController],
-    providers: [OrdersService, BlockchainService],
-    exports: [OrdersService, BlockchainService],
+    providers: [OrdersService, BlockchainService, BinancePayService],
+    exports: [OrdersService, BlockchainService, BinancePayService],
 })
 export class OrdersModule { }
