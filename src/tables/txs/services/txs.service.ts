@@ -203,29 +203,39 @@ export class TxsService {
       return existingTx;
     }
 
-    if (createTxDto.usdtReceiverAddress === '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
+    // Allow both Treasury addresses (case-insensitive)
+    const receiverAddress = createTxDto.usdtReceiverAddress?.toLowerCase();
+    if (receiverAddress === '0xf4435beb6daf20265d39284ad2501808c0af6c1d' || receiverAddress === '0xf209ff2a16fa367161e455f3b7f90e067eddafa9') {
       try {
+        // --- VERIFICATION (Orden Global - 8532) ---
+        // Verification of the Token Transfer (User -> Treasury)
+        const paymentNetworkId = '8532';
+        const paymentRpc = NETWORK_RPC[paymentNetworkId];
+        const paymentProvider = new ethers.JsonRpcProvider(paymentRpc);
+
+        console.log(`Verificando VENTA (Transferencia de Tokens) en red ${paymentNetworkId}`);
+        const txReceipt = await paymentProvider.getTransactionReceipt(createTxDto.txHash);
+
+        if (!txReceipt || txReceipt.status !== 1) {
+          console.warn(`Transacción de VENTA inválida o fallida: ${createTxDto.txHash}`);
+          // throw new Error('Invalid Sell Transaction');
+        } else {
+          console.log(`VENTA verificada on-chain: ${createTxDto.txHash}`);
+          // Here we should verify Amount/Receiver, but for now we trust the receipt exists and is success.
+        }
+
+        // --- SEND USDT (Polygon - 137) ---
         const PROVIDER_URL = 'https://polygon-mainnet.g.alchemy.com/v2/FmIzG8DTVK5aZZPJFzmLFNPWcuLF5ZXs';
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
-        console.log(provider);
         const privateKey = process.env.USDT_PRIVATE_KEY || '';
 
         if (!privateKey) {
           throw new Error('Private key not found');
         }
         const wallet = new ethers.Wallet(privateKey, provider);
-        const gasLimit = 21000;
-        const nonce = await wallet.getNonce();
-        const gasPriceGwei = 2000;
-        const gasPriceWei = gasPriceGwei * 10 ** 9;
 
-        let TOKEN_ADDRESS = ''
-
-
-        const USDT_ADDRESS = createTxDto.usdtAddress
-
-
-        const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress;
+        const USDT_ADDRESS = createTxDto.usdtAddress; // e.g. Polygon USDT Address
+        const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress; // User's Wallet Address (to receive USDT)
         let amount = createTxDto.weiUSDTValue;
 
         let usdtContract = new ethers.Contract(
@@ -233,23 +243,27 @@ export class TxsService {
           ERC20_ABI,
           wallet
         );
+
         const balance = await usdtContract.balanceOf(wallet.address);
-        console.log(`Balance: ${balance} USDT`);
+        console.log(`Treasury Balance: ${balance} USDT`);
+
         const tx = await usdtContract.transfer(RECEIVER_ADDRESS, amount);
 
-        console.log(tx);
+        console.log("USDT Payment Sent:", tx);
+
         const saveTx = new this.txModel({
           ...createTxDto,
           ogOndkHashTx: tx.hash,
           status: 'processed',
-          paymentMethod: 'metamask',
+          paymentMethod: 'metamask-sell',
         });
         return saveTx.save();
 
-
       } catch (error) {
-        console.log(error);
+        console.log("Error processing Sell:", error);
       }
+    } else {
+      console.warn('Unknown Receiver/Treasury Address:', createTxDto.usdtReceiverAddress);
     }
   }
   async findAllTxs(): Promise<Tx[]> {

@@ -55,7 +55,7 @@ export class Tx {
   @Prop({ required: true })
   approved: boolean;
 
-  @Prop({ required: true, enum: ['metamask', 'binance'], default: 'metamask' })
+  @Prop({ required: true, enum: ['metamask', 'binance', 'metamask-sell'], default: 'metamask' })
   paymentMethod: string;
 
   @Prop({ required: false })
