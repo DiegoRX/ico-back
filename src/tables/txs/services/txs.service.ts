@@ -127,7 +127,6 @@ export class TxsService {
         const wallet = new ethers.Wallet(privateKey, provider);
         console.log(wallet.address)
         const gasLimit = 21000;
-        const nonce = await wallet.getNonce();
         const gasPriceGwei = 2000;
         const gasPriceWei = gasPriceGwei * 10 ** 9;
 
@@ -168,7 +167,6 @@ export class TxsService {
             to: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress),
             value: createTxDto.weiTokenValue,
             gasLimit: gasLimit,
-            nonce: nonce,
             gasPrice: gasPriceWei,
           };
           const balance = await provider.getBalance(wallet.address);
@@ -224,19 +222,25 @@ export class TxsService {
           // Here we should verify Amount/Receiver, but for now we trust the receipt exists and is success.
         }
 
-        // --- SEND USDT (Polygon - 137) ---
-        const PROVIDER_URL = 'https://polygon-mainnet.g.alchemy.com/v2/FmIzG8DTVK5aZZPJFzmLFNPWcuLF5ZXs';
-        const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
+        // --- SEND USDT on the user's chosen payout network ---
+        const payoutNetworkId = createTxDto.networkId || '137'; // Default Polygon
+        const payoutRpc = NETWORK_RPC[payoutNetworkId] || NETWORK_RPC['137'];
+        console.log(`Sending USDT payout on network ${payoutNetworkId} via ${payoutRpc}`);
+
+        const provider = new ethers.JsonRpcProvider(payoutRpc);
         const privateKey = process.env.USDT_PRIVATE_KEY || '';
 
         if (!privateKey) {
-          throw new Error('Private key not found');
+          throw new Error('USDT_PRIVATE_KEY not found');
         }
         const wallet = new ethers.Wallet(privateKey, provider);
 
-        const USDT_ADDRESS = createTxDto.usdtAddress; // e.g. Polygon USDT Address
+        // Use the correct USDT address for the payout network
+        const USDT_ADDRESS = USDT_ADDRESSES[payoutNetworkId] || createTxDto.usdtAddress;
         const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress; // User's Wallet Address (to receive USDT)
         let amount = createTxDto.weiUSDTValue;
+
+        console.log(`USDT Payout: ${amount} to ${RECEIVER_ADDRESS} on ${payoutNetworkId} (USDT: ${USDT_ADDRESS})`);
 
         let usdtContract = new ethers.Contract(
           USDT_ADDRESS,
@@ -245,9 +249,28 @@ export class TxsService {
         );
 
         const balance = await usdtContract.balanceOf(wallet.address);
-        console.log(`Treasury Balance: ${balance} USDT`);
+        console.log(`Treasury USDT Balance on ${payoutNetworkId}: ${balance}`);
 
-        const tx = await usdtContract.transfer(RECEIVER_ADDRESS, amount);
+        // Frontend always sends weiUSDTValue assuming 6 decimals.
+        // BSC USDT has 18 decimals — recalculate if needed.
+        let actualDecimals = 6;
+        try {
+          actualDecimals = Number(await usdtContract.decimals());
+          console.log(`USDT decimals on network ${payoutNetworkId}: ${actualDecimals}`);
+        } catch (e) {
+          console.warn('Could not query decimals(), assuming 6');
+        }
+
+        let finalAmount = amount;
+        if (actualDecimals !== 6 && amount) {
+          // Convert from 6-decimal representation to actual decimals
+          // e.g. 30000 (0.03 USDT @ 6 dec) → 30000000000000000 (0.03 USDT @ 18 dec)
+          const diff = actualDecimals - 6;
+          finalAmount = (BigInt(amount) * BigInt(10 ** diff)).toString();
+          console.log(`Adjusted amount from ${amount} (6 dec) to ${finalAmount} (${actualDecimals} dec)`);
+        }
+
+        const tx = await usdtContract.transfer(RECEIVER_ADDRESS, finalAmount);
 
         console.log("USDT Payment Sent:", tx);
 
