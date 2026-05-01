@@ -21,7 +21,8 @@ export class BlockchainService {
     private readonly provider: ethers.JsonRpcProvider;
 
     constructor(private readonly configService: ConfigService) {
-        const providerUrl = this.configService.get<string>('PROVIDER_URL');
+        let providerUrl = this.configService.get<string>('PROVIDER_URL') || process.env.PROVIDER_URL || 'https://www.ordenglobal-rpc.com';
+        providerUrl = providerUrl.replace(/^['"]|['"]$/g, '');
         this.provider = new ethers.JsonRpcProvider(providerUrl);
     }
 
