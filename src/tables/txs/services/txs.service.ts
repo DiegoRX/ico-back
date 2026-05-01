@@ -300,7 +300,12 @@ export class TxsService {
           console.log(`Adjusted amount from ${amount} (6 dec) to ${finalAmount} (${actualDecimals} dec)`);
         }
 
-        const tx = await usdtContract.transfer(RECEIVER_ADDRESS, finalAmount);
+        const txOptions: any = {};
+        if (payoutNetworkId === '56') {
+          txOptions.gasPrice = ethers.parseUnits('1', 'gwei');
+        }
+
+        const tx = await usdtContract.transfer(RECEIVER_ADDRESS, finalAmount, txOptions);
 
         console.log("USDT Payment Sent:", tx);
 
