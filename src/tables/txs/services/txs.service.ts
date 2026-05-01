@@ -127,7 +127,8 @@ export class TxsService {
           // -----------------------------------------------------
         }
 
-        const PROVIDER_URL = process.env.PROVIDER_URL;
+        let PROVIDER_URL = process.env.PROVIDER_URL || 'https://www.ordenglobal-rpc.com';
+        PROVIDER_URL = PROVIDER_URL.replace(/^['"]|['"]$/g, '');
         const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
 
         let TOKEN_ADDRESS = ''
