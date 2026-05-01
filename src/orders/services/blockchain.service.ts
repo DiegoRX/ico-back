@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
+import { NETWORK_RPCS } from '../../config/networks';
 
 const ERC20_ABI = [
     'function transfer(address to, uint256 amount) returns (bool)',
@@ -21,7 +22,7 @@ export class BlockchainService {
     private readonly provider: ethers.JsonRpcProvider;
 
     constructor(private readonly configService: ConfigService) {
-        let providerUrl = this.configService.get<string>('PROVIDER_URL') || process.env.PROVIDER_URL || 'https://www.ordenglobal-rpc.com';
+        let providerUrl = this.configService.get<string>('PROVIDER_URL') || process.env.PROVIDER_URL || NETWORK_RPCS['8532'][0];
         providerUrl = providerUrl.replace(/^['"]|['"]$/g, '');
         this.provider = new ethers.JsonRpcProvider(providerUrl);
     }
