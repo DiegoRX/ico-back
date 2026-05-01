@@ -10,12 +10,44 @@ import { Wallet, ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import ERC20_ABI from '../../../config/abi/erc20.json'
 
-const NETWORK_RPC: Record<string, string> = {
-  '137': 'https://polygon-rpc.com',
-  '8532': 'https://www.ordenglobal-rpc.com',
-  '56': 'https://bsc-dataseed.binance.org',
-  '1': 'https://cloudflare-eth.com',
+// Multiple RPCs per network for automatic fallback resilience.
+// Add/remove URLs here without touching any logic below.
+const NETWORK_RPCS: Record<string, string[]> = {
+  '137': [
+    'https://polygon-bor-rpc.publicnode.com',
+    'https://1rpc.io/matic',
+    'https://rpc-mainnet.matic.quiknode.pro',
+    'https://polygon.llamarpc.com',
+  ],
+  '8532': [
+    'https://www.ordenglobal-rpc.com',
+  ],
+  '56': [
+    'https://bsc-rpc.publicnode.com',
+    'https://1rpc.io/bnb',
+    'https://bsc-dataseed.binance.org',
+  ],
+  '1': [
+    'https://eth.llamarpc.com',
+    'https://1rpc.io/eth',
+    'https://cloudflare-eth.com',
+  ],
 };
+
+/**
+ * Returns an ethers FallbackProvider (quorum=1) for the given network.
+ * Automatically tries next RPC if one fails — no single point of failure.
+ */
+function getProvider(networkId: string): ethers.FallbackProvider | ethers.JsonRpcProvider {
+  const urls = NETWORK_RPCS[networkId] ?? NETWORK_RPCS['137'];
+  if (urls.length === 1) {
+    return new ethers.JsonRpcProvider(urls[0]);
+  }
+  const providers = urls.map((url, i) =>
+    ({ provider: new ethers.JsonRpcProvider(url), priority: i + 1, weight: 1, stallTimeout: 2000 })
+  );
+  return new ethers.FallbackProvider(providers, undefined, { quorum: 1 });
+}
 
 const USDT_ADDRESSES: Record<string, string> = {
   '137': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
@@ -44,10 +76,9 @@ export class TxsService {
       try {
         // VERIFICACIÓN DE LA TRANSACCIÓN DE PAGO (Phase 7)
         const paymentNetworkId = createTxDto.networkId || '137'; // Default Polygon
-        const paymentRpc = NETWORK_RPC[paymentNetworkId] || NETWORK_RPC['137'];
-        const paymentProvider = new ethers.JsonRpcProvider(paymentRpc);
+        const paymentProvider = getProvider(paymentNetworkId);
 
-        console.log(`Verificando pago en red ${paymentNetworkId} con RPC ${paymentRpc}`);
+        console.log(`Verificando pago en red ${paymentNetworkId}`);
         const txReceipt = await paymentProvider.getTransactionReceipt(createTxDto.txHash);
 
         if (!txReceipt || txReceipt.status !== 1) {
@@ -89,11 +120,7 @@ export class TxsService {
 
           if (!validTransfer) {
             console.error(`SECURITY ALERT: Hash ${createTxDto.txHash} has NO valid transfer to treasury ${createTxDto.usdtReceiverAddress} with amount ${createTxDto.weiUSDTValue}`);
-            // throw new Error('Security Verification Failed: Invoice amount does not match blockchain transfer.');
-            // For now, we log but continue to avoid breaking existing flows if formats differ slightly, 
-            // BUT this should strictly THROW in production.
-            // UNCOMMENT BELOW TO ENFORCE:
-            // return { error: 'Security Verification Failed: Amount or Receiver mismatch' };
+            throw new Error('Security Verification Failed: Amount or Receiver mismatch on-chain.');
           } else {
             console.log('✅ Security Verification Passed: On-chain amount matches invoice.');
           }
@@ -208,26 +235,68 @@ export class TxsService {
         // --- VERIFICATION (Orden Global - 8532) ---
         // Verification of the Token Transfer (User -> Treasury)
         const paymentNetworkId = '8532';
-        const paymentRpc = NETWORK_RPC[paymentNetworkId];
-        const paymentProvider = new ethers.JsonRpcProvider(paymentRpc);
+        const paymentProvider = getProvider(paymentNetworkId);
 
         console.log(`Verificando VENTA (Transferencia de Tokens) en red ${paymentNetworkId}`);
         const txReceipt = await paymentProvider.getTransactionReceipt(createTxDto.txHash);
 
         if (!txReceipt || txReceipt.status !== 1) {
           console.warn(`Transacción de VENTA inválida o fallida: ${createTxDto.txHash}`);
-          // throw new Error('Invalid Sell Transaction');
+          throw new Error('Invalid Sell Transaction: tx not found or failed on-chain');
         } else {
           console.log(`VENTA verificada on-chain: ${createTxDto.txHash}`);
-          // Here we should verify Amount/Receiver, but for now we trust the receipt exists and is success.
+
+          // --- SECURITY: Verify token transfer amount & receiver on-chain ---
+          const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+          // Check if it's ORIGEN (native coin sent via sendTransaction) or ERC20 token
+          if (createTxDto.tokenName === 'ORIGEN') {
+            // Native coin: verify tx.to and tx.value
+            const txData = await paymentProvider.getTransaction(createTxDto.txHash);
+            if (txData) {
+              const txTo = txData.to?.toLowerCase();
+              const expectedTo = createTxDto.usdtReceiverAddress?.toLowerCase();
+              const txValue = txData.value?.toString();
+              const expectedValue = createTxDto.weiTokenValue;
+              if (txTo !== expectedTo || txValue !== expectedValue) {
+                console.error(`SELL SECURITY ALERT: ORIGEN tx mismatch. To: ${txTo} vs ${expectedTo}, Value: ${txValue} vs ${expectedValue}`);
+                throw new Error('Security Verification Failed: ORIGEN transfer mismatch');
+              }
+              console.log('✅ SELL Security: ORIGEN transfer verified on-chain.');
+            }
+          } else {
+            // ERC20 token: verify Transfer event logs
+            const validTransfer = txReceipt.logs.find((log: any) => {
+              try {
+                if (!log.topics || log.topics[0] !== transferTopic) return false;
+                const logReceiver = '0x' + log.topics[2].slice(26).toLowerCase();
+                const expectedReceiver = createTxDto.usdtReceiverAddress?.toLowerCase();
+                if (logReceiver !== expectedReceiver) return false;
+                const logValue = BigInt(log.data || '0').toString();
+                const expectedValue = createTxDto.weiTokenValue;
+                if (logValue !== expectedValue) {
+                  console.warn(`SELL Amount Mismatch! Log: ${logValue}, Expected: ${expectedValue}`);
+                  return false;
+                }
+                return true;
+              } catch (e) { return false; }
+            });
+            if (!validTransfer) {
+              console.error(`SELL SECURITY ALERT: No valid ERC20 transfer found for ${createTxDto.txHash}`);
+              throw new Error('Security Verification Failed: Token transfer mismatch');
+            }
+            console.log('✅ SELL Security: ERC20 transfer verified on-chain.');
+          }
         }
 
-        // --- SEND USDT on the user's chosen payout network ---
-        const payoutNetworkId = createTxDto.networkId || '137'; // Default Polygon
-        const payoutRpc = NETWORK_RPC[payoutNetworkId] || NETWORK_RPC['137'];
-        console.log(`Sending USDT payout on network ${payoutNetworkId} via ${payoutRpc}`);
+        // Validate networkId against whitelist
+        const ALLOWED_NETWORKS = ['137', '56', '1'];
+        const payoutNetworkId = createTxDto.networkId || '137';
+        if (!ALLOWED_NETWORKS.includes(payoutNetworkId)) {
+          throw new Error(`Unsupported payout network: ${payoutNetworkId}`);
+        }
+        console.log(`Sending USDT payout on network ${payoutNetworkId}`);
 
-        const provider = new ethers.JsonRpcProvider(payoutRpc);
+        const provider = getProvider(payoutNetworkId);
         const privateKey = process.env.USDT_PRIVATE_KEY || '';
 
         if (!privateKey) {
@@ -235,8 +304,11 @@ export class TxsService {
         }
         const wallet = new ethers.Wallet(privateKey, provider);
 
-        // Use the correct USDT address for the payout network
-        const USDT_ADDRESS = USDT_ADDRESSES[payoutNetworkId] || createTxDto.usdtAddress;
+        // Use ONLY hardcoded USDT addresses — never trust client-sent address
+        const USDT_ADDRESS = USDT_ADDRESSES[payoutNetworkId];
+        if (!USDT_ADDRESS) {
+          throw new Error(`No USDT address configured for network ${payoutNetworkId}`);
+        }
         const RECEIVER_ADDRESS = createTxDto.tokenReceiverAddress; // User's Wallet Address (to receive USDT)
         let amount = createTxDto.weiUSDTValue;
 
