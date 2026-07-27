@@ -139,14 +139,17 @@ export class TxsService {
           console.log(`Balance: ${balance} tokens`);
           const tx = await tokenContract.transfer(RECEIVER_ADDRESS, amount);
 
-          console.log(tx);
+          console.log(`ERC20 payout broadcast: ${tx.hash}`);
           const saveTx = new this.txModel({
             ...createTxDto,
             ogOndkHashTx: tx.hash,
-            status: 'processed',
+            status: 'pending',
             paymentMethod: 'metamask',
           });
-          return saveTx.save();
+          const saved = await saveTx.save();
+          this.confirmPayout(tx);
+
+          return saved;
         } else if (createTxDto.tokenName === 'ORIGEN') {
           const data = {
             to: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress),
@@ -157,25 +160,59 @@ export class TxsService {
           const balance = await provider.getBalance(wallet.address);
           console.log(balance);
           const transaction = await wallet.sendTransaction(data);
-          console.log(transaction);
-          const tx = await transaction.wait();
-          console.log(tx);
+          console.log(`ORIGEN payout broadcast: ${transaction.hash}`);
+
+          // Do NOT await transaction.wait() here. Waiting for the block pushed
+          // this request past Heroku's 30s router timeout (H12); the router then
+          // returns its own error page, which carries no CORS headers, so the
+          // browser reports the whole thing as a CORS failure. Persist as soon
+          // as the payout is broadcast and confirm out of band.
           const txDataToSave = {
             ...createTxDto, // Copia los datos originales
             tokenReceiverAddress: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress), // Ensure string
-            ogOndkHashTx: tx.hash,
-            status: 'processed',
+            ogOndkHashTx: transaction.hash,
+            status: 'pending',
             paymentMethod: 'metamask', // Identificador de origen
           };
 
           const saveTx = new this.txModel(txDataToSave);
-          return saveTx.save();
+          const saved = await saveTx.save();
+          this.confirmPayout(transaction);
+
+          return saved;
         }
       } catch (error) {
         console.log(error);
       }
     }
   }
+  /**
+   * Confirms an already-broadcast payout out of band and flips the stored
+   * record from 'pending' to 'processed' or 'failed'.
+   *
+   * This is deliberately never awaited by a request handler. Waiting for a
+   * block inside the request is what pushed POST /txs past Heroku's 30s
+   * router timeout (H12); the router's own error page carries no
+   * Access-Control-Allow-Origin header, so the browser reported the timeout
+   * as a CORS failure.
+   */
+  private confirmPayout(transaction: { hash: string; wait: () => Promise<any> }) {
+    transaction
+      .wait()
+      .then((receipt) =>
+        this.txModel
+          .updateOne(
+            { ogOndkHashTx: transaction.hash },
+            { status: receipt && receipt.status === 1 ? 'processed' : 'failed' },
+          )
+          .exec(),
+      )
+      .then(() => console.log(`Payout confirmed: ${transaction.hash}`))
+      .catch((err) =>
+        console.error(`Payout confirmation failed for ${transaction.hash}:`, err),
+      );
+  }
+
   async createSellTx(createTxDto: CreateTxDto) {
     console.log(createTxDto);
 
@@ -307,15 +344,18 @@ export class TxsService {
 
         const tx = await usdtContract.transfer(RECEIVER_ADDRESS, finalAmount, txOptions);
 
-        console.log("USDT Payment Sent:", tx);
+        console.log("USDT payout broadcast:", tx.hash);
 
         const saveTx = new this.txModel({
           ...createTxDto,
           ogOndkHashTx: tx.hash,
-          status: 'processed',
+          status: 'pending',
           paymentMethod: 'metamask-sell',
         });
-        return saveTx.save();
+        const saved = await saveTx.save();
+        this.confirmPayout(tx);
+
+        return saved;
 
       } catch (error) {
         console.log("Error processing Sell:", error);

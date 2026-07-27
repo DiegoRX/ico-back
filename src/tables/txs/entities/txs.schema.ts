@@ -52,8 +52,13 @@ export class Tx {
   @Prop({ required: true })
   ogOndkHashTx: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: false })
   approved: boolean;
+
+  // Without an explicit @Prop the schema is strict and Mongoose silently
+  // dropped the status the service was already setting, so it never persisted.
+  @Prop({ required: false, enum: ['pending', 'processed', 'failed'], default: 'pending' })
+  status: string;
 
   @Prop({ required: true, enum: ['metamask', 'binance', 'metamask-sell'], default: 'metamask' })
   paymentMethod: string;
