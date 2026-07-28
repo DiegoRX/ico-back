@@ -23,7 +23,8 @@ export class TxsService {
     console.log(createTxDto);
 
     // Normalize: on-chain hashes must compare case-insensitively.
-    createTxDto.txHash = (createTxDto.txHash || '').toLowerCase();
+    // (The DTO is read-only, so the canonical form lives in a local.)
+    const txHash = (createTxDto.txHash || '').toLowerCase();
 
     // ATOMIC CLAIM (anti double-payout): the first request for this txHash
     // inserts a 'processing' stub in one atomic upsert; any repeated or
@@ -32,10 +33,11 @@ export class TxsService {
     // 0xeec3af... was paid out twice, txs 0x3170fb... and 0x238c43...).
     // findOneAndUpdate is a write op, so it always hits the Mongo primary.
     const existingTx = await this.txModel.findOneAndUpdate(
-      { txHash: createTxDto.txHash },
+      { txHash },
       {
         $setOnInsert: {
           ...createTxDto,
+          txHash,
           tokenReceiverAddress: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress),
           ogOndkHashTx: 'processing',
           status: 'pending',
@@ -46,7 +48,7 @@ export class TxsService {
       { upsert: true, new: false },
     ).exec();
     if (existingTx) {
-      console.log('Transacción ya procesada o en curso:', createTxDto.txHash);
+      console.log('Transacción ya procesada o en curso:', txHash);
       return existingTx;
     }
 
@@ -163,7 +165,7 @@ export class TxsService {
           console.log(`ERC20 payout broadcast: ${tx.hash}`);
           // Flip the 'processing' stub to the real payout hash.
           const saved = await this.txModel.findOneAndUpdate(
-            { txHash: createTxDto.txHash },
+            { txHash },
             { $set: { ogOndkHashTx: tx.hash, status: 'pending' } },
             { new: true },
           ).exec();
@@ -188,7 +190,7 @@ export class TxsService {
           // browser reports the whole thing as a CORS failure. Persist as soon
           // as the payout is broadcast and confirm out of band.
           const saved = await this.txModel.findOneAndUpdate(
-            { txHash: createTxDto.txHash },
+            { txHash },
             { $set: { ogOndkHashTx: transaction.hash, status: 'pending' } },
             { new: true },
           ).exec();
@@ -200,11 +202,11 @@ export class TxsService {
         console.log(error);
         // Release the claim ONLY if no payout was broadcast (stub untouched),
         // so a failed verification can be retried without double-payout risk.
-        await this.txModel.deleteOne({ txHash: createTxDto.txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
+        await this.txModel.deleteOne({ txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
       }
     } else {
       console.warn('Unknown Receiver/Treasury Address (buy):', createTxDto.usdtReceiverAddress);
-      await this.txModel.deleteOne({ txHash: createTxDto.txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
+      await this.txModel.deleteOne({ txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
     }
   }
   /**
@@ -238,14 +240,16 @@ export class TxsService {
     console.log(createTxDto);
 
     // Normalize: on-chain hashes must compare case-insensitively.
-    createTxDto.txHash = (createTxDto.txHash || '').toLowerCase();
+    // (The DTO is read-only, so the canonical form lives in a local.)
+    const txHash = (createTxDto.txHash || '').toLowerCase();
 
     // ATOMIC CLAIM (anti double-payout) — see createTx for rationale.
     const existingTx = await this.txModel.findOneAndUpdate(
-      { txHash: createTxDto.txHash },
+      { txHash },
       {
         $setOnInsert: {
           ...createTxDto,
+          txHash,
           tokenReceiverAddress: (Array.isArray(createTxDto.tokenReceiverAddress) ? createTxDto.tokenReceiverAddress[0] : createTxDto.tokenReceiverAddress),
           ogOndkHashTx: 'processing',
           status: 'pending',
@@ -256,7 +260,7 @@ export class TxsService {
       { upsert: true, new: false },
     ).exec();
     if (existingTx) {
-      console.log('Transacción ya procesada o en curso:', createTxDto.txHash);
+      console.log('Transacción ya procesada o en curso:', txHash);
       return existingTx;
     }
 
@@ -385,7 +389,7 @@ export class TxsService {
 
         // Flip the 'processing' stub to the real payout hash.
         const saved = await this.txModel.findOneAndUpdate(
-          { txHash: createTxDto.txHash },
+          { txHash },
           { $set: { ogOndkHashTx: tx.hash, status: 'pending' } },
           { new: true },
         ).exec();
@@ -396,11 +400,11 @@ export class TxsService {
       } catch (error) {
         console.log("Error processing Sell:", error);
         // Release the claim ONLY if no payout was broadcast (stub untouched).
-        await this.txModel.deleteOne({ txHash: createTxDto.txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
+        await this.txModel.deleteOne({ txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
       }
     } else {
       console.warn('Unknown Receiver/Treasury Address:', createTxDto.usdtReceiverAddress);
-      await this.txModel.deleteOne({ txHash: createTxDto.txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
+      await this.txModel.deleteOne({ txHash, ogOndkHashTx: 'processing' }).exec().catch(() => undefined);
     }
   }
   async findAllTxs(): Promise<Tx[]> {
