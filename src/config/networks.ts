@@ -3,18 +3,26 @@ import { ethers } from 'ethers';
 /**
  * Official RPC URLs for different networks.
  * These are used across the application for transaction verification and token transfers.
+ * Multiple URLs per network: FallbackProvider races to the next one if the first
+ * stalls or rate-limits (Alchemy free tier returns 429 under global load).
  */
 export const NETWORK_RPCS: Record<string, string[]> = {
   '137': [
+    'https://polygon-bor-rpc.publicnode.com',
+    'https://polygon-rpc.com',
     'https://polygon-mainnet.g.alchemy.com/v2/q9YfSqOd5vXRKXfTROwrVmV4g7K5dazb',
   ],
   '8532': [
     'https://www.ordenglobal-rpc.com',
   ],
   '56': [
+    'https://bsc-rpc.publicnode.com',
+    'https://bsc-dataseed.bnbchain.org',
     'https://bnb-mainnet.g.alchemy.com/v2/q9YfSqOd5vXRKXfTROwrVmV4g7K5dazb',
   ],
   '1': [
+    'https://ethereum-rpc.publicnode.com',
+    'https://eth.llamarpc.com',
     'https://eth-mainnet.g.alchemy.com/v2/q9YfSqOd5vXRKXfTROwrVmV4g7K5dazb',
   ],
 };
