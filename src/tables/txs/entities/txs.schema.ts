@@ -31,7 +31,11 @@ export class Tx {
   @Prop({ required: true })
   tokenReceiverAddress: string;
 
-  @Prop({ required: true })
+  // unique: hard DB-level guarantee against double payouts for one payment.
+  // NOTE: the index only builds if the collection has no duplicate txHash
+  // docs — clean up existing duplicates (e.g. the 2026-07-28 double payout)
+  // or Mongo will skip creating it.
+  @Prop({ required: true, unique: true, index: true })
   txHash: string;
 
   @Prop({ required: false })
